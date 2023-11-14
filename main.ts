@@ -491,7 +491,7 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
       });
     });
   } else {
-    bot.action("Начать с начала", (ctx) => {
+    bot.action("0", (ctx) => {
       renderMessage(0, ctx);
     });
   }
