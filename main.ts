@@ -508,7 +508,7 @@ function renderMessage(i: number, ctx: any) {
           )
         )
       : Markup.inlineKeyboard([
-          Markup.button.callback("start over", "start_over"),
+          Markup.button.callback("К началу", "0"),
         ])
   );
 }
