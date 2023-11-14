@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc main.ts",
-    "start": "node main.js",
-    "setup": "npm ci && npm run build"
+    "start": "node main.js"
   },
   "author": "",
   "license": "ISC",
