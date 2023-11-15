@@ -322,8 +322,8 @@ const normalizedGraph: Record<string, MessageRaw> = {
     Ваш объект соотносится с критерием “изобретательский уровень”?`,
     buttons: [
       {
-        text: "33",
-        to: "7",
+        text: "Да",
+        to: "33",
       },
       {
         text: "Нет",
