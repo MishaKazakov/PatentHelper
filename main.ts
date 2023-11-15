@@ -1,4 +1,4 @@
-import { Markup, Scenes, session, Telegraf } from "telegraf";
+import { Context, Markup, Scenes, session, Telegraf } from "telegraf";
 
 type ButtonRaw = {
   text: string;
@@ -480,7 +480,7 @@ const normalizedGraph: Record<string, MessageRaw> = {
   },
 };
 
-const token = process.env.token;
+const token = process.env.token as string;
 
 const bot = new Telegraf<Scenes.WizardContext>(token);
 Object.entries(normalizedGraph).forEach(([, value]) => {
@@ -497,8 +497,29 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
   }
 });
 
-function renderMessage(i: number, ctx: any) {
+async function renderMessage(i: number, ctx: Context) {
   const value = normalizedGraph[i];
+  await ctx.editMessageText(value.message, {
+    reply_markup: {
+      inline_keyboard: [
+        value.buttons
+          ? value.buttons.map((button) => ({
+              text: button.text,
+              callback_data: button.to,
+            }))
+          : [
+              {
+                text: "К началу",
+                callback_data: "0",
+              },
+            ],
+      ],
+    },
+  });
+}
+
+bot.command("start", (ctx) => {
+  const value = normalizedGraph[0];
   ctx.reply(
     value.message,
     value.buttons
@@ -507,14 +528,8 @@ function renderMessage(i: number, ctx: any) {
             Markup.button.callback(button.text, button.to)
           )
         )
-      : Markup.inlineKeyboard([
-          Markup.button.callback("К началу", "0"),
-        ])
+      : Markup.inlineKeyboard([Markup.button.callback("К началу", "0")])
   );
-}
-
-bot.command("start", (ctx) => {
-  renderMessage(0, ctx);
 });
 
 bot.use(session());
