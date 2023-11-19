@@ -536,7 +536,7 @@ const normalizedGraph: Record<string, MessageRaw> = {
   },
 
   50: {
-    message: "",
+    message: "Выберите один из вариантов",
     buttons: [
       {
         text: "Отличия полезной модели и изобретения",
@@ -567,7 +567,7 @@ const normalizedGraph: Record<string, MessageRaw> = {
 
   // start Отличия полезной модели и изобретения
   51: {
-    message: "",
+    message: "Выберите один из вариантов",
     buttons: [
       {
         text: "Срок патентования",
@@ -683,7 +683,7 @@ const normalizedGraph: Record<string, MessageRaw> = {
 
   // start Пошлины за объекты и поддержание патента в силе
   59: {
-    message: ``,
+    message: "Выберите один из вариантов",
     buttons: [
       {
         text: "Минимальный размер пошлин",
@@ -773,7 +773,7 @@ const normalizedGraph: Record<string, MessageRaw> = {
 
   // start Дополнительная информация
   64: {
-    message: ``,
+    message: "Выберите один из вариантов",
     buttons: [
       {
         text: "Выставочный приоритет- льгота по новизне,",
@@ -839,7 +839,7 @@ const normalizedGraph: Record<string, MessageRaw> = {
   },
   // end Дополнительная информация
   n: {
-    message: ``,
+    message: "Выберите один из вариантов",
     buttons: [
       {
         text: "Да",
