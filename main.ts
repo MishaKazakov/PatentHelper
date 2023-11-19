@@ -1,4 +1,5 @@
 import { Context, Markup, Scenes, session, Telegraf } from "telegraf";
+import { InlineKeyboardButton } from "telegraf/typings/core/types/typegram";
 
 type ButtonRaw = {
   text: string;
@@ -874,21 +875,38 @@ async function renderMessage(i: number, ctx: Context) {
   const value = normalizedGraph[i];
   await ctx.editMessageText(value.message, {
     reply_markup: {
-      inline_keyboard: [
-        value.buttons
-          ? value.buttons.map((button) => ({
-              text: button.text,
-              callback_data: button.to,
-            }))
-          : [
-              {
-                text: "К началу",
-                callback_data: "0",
-              },
-            ],
-      ],
+      inline_keyboard: prepareButtons(value.buttons),
     },
   });
+}
+
+function prepareButtons(buttons?: ButtonRaw[]): InlineKeyboardButton[][] {
+  if (!buttons) {
+    return [
+      [
+        {
+          text: "К началу",
+          callback_data: "0",
+        },
+      ],
+    ];
+  }
+
+  if (buttons.length < 3) {
+    return [
+      buttons.map((button) => ({
+        text: button.text,
+        callback_data: button.to,
+      })),
+    ];
+  }
+
+  return buttons.map((button) => [
+    {
+      text: button.text,
+      callback_data: button.to,
+    },
+  ]);
 }
 
 bot.command("start", (ctx) => {
