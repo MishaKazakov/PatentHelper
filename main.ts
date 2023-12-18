@@ -9,12 +9,14 @@ type ButtonRaw = {
 type MessageRaw = {
   message: string;
   buttons?: ButtonRaw[];
+  action?: "pay";
 };
+const beforePayment = -3;
+const afterPayment = 3;
 
 const normalizedGraph: Record<string, MessageRaw> = {
   0: {
-    message:
-  `Я с удовольствием расскажу вам об интересующем вас функционале. Что именно вас интересует?
+    message: `Я с удовольствием расскажу вам об интересующем вас функционале. Что именно вас интересует?
       Выберите нужный раздел 👇`,
     buttons: [
       {
@@ -23,7 +25,7 @@ const normalizedGraph: Record<string, MessageRaw> = {
       },
       {
         text: "Начать консультацию",
-        to: "3",
+        to: beforePayment.toString(),
       },
     ],
   },
@@ -32,7 +34,11 @@ const normalizedGraph: Record<string, MessageRaw> = {
     message:
       "Мы инициативная группа, которая хочет помочь молодым специалистам стать грамотнее в области интеллектуальной собственности!",
   },
-  3: {
+  [beforePayment]: {
+    message: "Для начала консультации, пожалуйста, произведите оплату",
+    action: "pay",
+  },
+  [afterPayment]: {
     message: `Сейчас я буду задавать вам вопросы касающиеся вашей интеллектуальной собственности.
     Вам необходимо ответить Да или Нет на каждый вопрос`,
     buttons: [
@@ -850,7 +856,12 @@ const token = process.env.token as string;
 
 const bot = new Telegraf<Scenes.WizardContext>(token);
 Object.entries(normalizedGraph).forEach(([, value]) => {
-  if (value.buttons) {
+  if (value.action === "pay") {
+    bot.action("pay", async (ctx) => {
+      const invoice = getInvoice(ctx.from?.id.toString()!);
+      await ctx.replyWithInvoice(invoice);
+    });
+  } else if (value.buttons) {
     value.buttons.forEach((button) => {
       bot.action(button.to, (ctx) => {
         renderMessage(Number(button.to), ctx);
@@ -863,11 +874,37 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
   }
 });
 
+const getInvoice = (id: string) => {
+  const invoice = {
+    chat_id: id, // Уникальный идентификатор целевого чата или имя пользователя целевого канала
+    provider_token: process.env.providerToken!, // токен выданный через бот @SberbankPaymentBot
+    start_parameter: "get_access", //Уникальный параметр глубинных ссылок. Если оставить поле пустым, переадресованные копии отправленного сообщения будут иметь кнопку «Оплатить», позволяющую нескольким пользователям производить оплату непосредственно из пересылаемого сообщения, используя один и тот же счет. Если не пусто, перенаправленные копии отправленного сообщения будут иметь кнопку URL с глубокой ссылкой на бота (вместо кнопки оплаты) со значением, используемым в качестве начального параметра.
+    title: "Консльтация MyPriority_bot", // Название продукта, 1-32 символа
+    description: "Консльтация MyPriority_bot по интеллектуальному праву", // Описание продукта, 1-255 знаков
+    currency: "RUB", // Трехбуквенный код валюты ISO 4217
+    prices: [{ label: "Консльтация MyPriority_bot", amount: 100 * 100 }], // Разбивка цен, сериализованный список компонентов в формате JSON 100 копеек * 100 = 100 рублей
+    payload: "payload",
+  };
+
+  return invoice;
+};
+
 async function renderMessage(i: number, ctx: Context) {
   const value = normalizedGraph[i];
+
   await ctx.editMessageText(value.message, {
     reply_markup: {
-      inline_keyboard: prepareButtons(value.buttons),
+      inline_keyboard:
+        value.action === "pay"
+          ? [
+              [
+                {
+                  text: "Оплатить",
+                  callback_data: "pay",
+                },
+              ],
+            ]
+          : prepareButtons(value.buttons),
     },
   });
 }
@@ -922,4 +959,22 @@ bot.launch({
     port: Number(process.env.port),
   },
 });
+
 console.log("bot has started");
+
+bot.on("pre_checkout_query", (ctx) => ctx.answerPreCheckoutQuery(true));
+
+bot.on("successful_payment", async (ctx) => {
+  const value = normalizedGraph[afterPayment];
+  ctx.reply(
+    value.message,
+    value.buttons
+      ? Markup.inlineKeyboard(
+          value.buttons.map((button) =>
+            Markup.button.callback(button.text, button.to)
+          )
+        )
+      : Markup.inlineKeyboard([Markup.button.callback("К началу", "0")])
+  );
+});
+
