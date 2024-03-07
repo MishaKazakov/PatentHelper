@@ -14,7 +14,7 @@ export type MessageRaw = {
 };
 const token = process.env.token as string;
 
-const parse_mode = "MarkdownV2";
+const parse_mode = "HTML";
 const bot = new Telegraf<Scenes.WizardContext>(token);
 Object.entries(normalizedGraph).forEach(([, value]) => {
   if (value.action === "pay") {
