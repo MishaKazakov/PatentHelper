@@ -17,7 +17,6 @@ export const normalizedGraph: Record<string, MessageRaw> = {
       {
         text: "Начать консультацию",
         to: beforePayment.toString(),
-        withVideo: true,
       },
     ],
   },

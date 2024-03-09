@@ -3,7 +3,7 @@ import { InlineKeyboardButton } from "telegraf/typings/core/types/typegram";
 import { normalizedGraph, afterPayment } from "./normalizedGraph";
 import * as fs from "fs";
 
-const videoBuffer = fs.readFileSync("./video.mp4");
+const videoBuffer = fs.readFileSync("./welcome.mp4");
 type ButtonRaw = {
   text: string;
   to: string;
@@ -116,6 +116,7 @@ bot.start((ctx) => {
         )
       )
     : Markup.inlineKeyboard([Markup.button.callback("К началу", "0")]);
+  ctx.sendVideo({ source: videoBuffer });
   ctx.reply(value.message, {
     parse_mode,
     reply_markup: {
