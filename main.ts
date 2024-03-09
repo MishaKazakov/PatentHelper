@@ -29,17 +29,16 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
       const invoice = getInvoice(ctx.from?.id.toString()!);
       await ctx.replyWithInvoice(invoice);
     });
-  // } 
-  // else if (value.action === feedbackAction) {
-  //   bot.action(feedbackAction, (ctx) => {
-  //     renderMessage(feedbackAction, ctx).then(() => {
-  //       (ctx.session as any).feedback = true;
-  //     });
-  //   });
+  } else if (value.action === feedbackAction) {
+    bot.action(feedbackAction, (ctx) => {
+      renderMessage(feedbackAction, ctx).then(() => {
+        (ctx.session as any).feedback = true;
+      });
+    });
   } else if (value.buttons) {
     value.buttons.forEach((button) => {
       bot.action(button.to, (ctx) => {
-        renderMessage(Number(button.to), ctx);
+        renderMessage(button.to, ctx);
       });
     });
   } else {
