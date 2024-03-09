@@ -1,7 +1,7 @@
 import { Context, Markup, Scenes, session, Telegraf } from "telegraf";
 import { InlineKeyboardButton } from "telegraf/typings/core/types/typegram";
 import { normalizedGraph, afterPayment } from "./normalizedGraph";
-import fs from "fs";
+import * as fs from "fs";
 
 const videoBuffer = fs.readFileSync("./video.mp4");
 type ButtonRaw = {
