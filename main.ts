@@ -5,7 +5,7 @@ import {
   afterPayment,
   payAction,
   feedbackAction,
-  menu,
+  afterFeedbackAction,
 } from "./normalizedGraph";
 
 type ButtonRaw = {
@@ -22,6 +22,7 @@ const token = process.env.token as string;
 
 const parse_mode = "HTML";
 const bot = new Telegraf<Scenes.WizardContext>(token);
+
 Object.entries(normalizedGraph).forEach(([, value]) => {
   if (value.action === payAction) {
     bot.action(payAction, async (ctx) => {
@@ -30,9 +31,8 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
     });
   } else if (value.action === feedbackAction) {
     bot.action(feedbackAction, (ctx) => {
-      renderMessage(feedbackAction, ctx);
-      bot.on("message", (ctx) => {
-        renderMessage(menu, ctx);
+      renderMessage(feedbackAction, ctx).then(() => {
+        (ctx.session as any).feedback = true;
       });
     });
   } else if (value.buttons) {
@@ -45,6 +45,14 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
     bot.action("0", (ctx) => {
       renderMessage(0, ctx);
     });
+  }
+});
+
+bot.on("message", (ctx) => {
+  if ((ctx.session as any).feedback && ctx.message && "text" in ctx.message) {
+    const userMessage = ctx.message.text;
+    console.log(userMessage);
+    renderMessage(afterFeedbackAction, ctx);
   }
 });
 

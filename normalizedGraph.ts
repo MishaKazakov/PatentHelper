@@ -7,6 +7,7 @@ const touHref =
 
 export const payAction = "pay";
 export const feedbackAction = "feedback";
+export const afterFeedbackAction = "afterFeedback";
 export const menu = 50;
 export const normalizedGraph: Record<string, MessageRaw> = {
   0: {
@@ -523,7 +524,7 @@ export const normalizedGraph: Record<string, MessageRaw> = {
     buttons: [
       {
         text: "Далее",
-        to: "50",
+        to: menu.toString(),
       },
     ],
   },
@@ -561,11 +562,20 @@ export const normalizedGraph: Record<string, MessageRaw> = {
       },
     ],
   },
-  feedbackAction: {
+  [feedbackAction]: {
     message: `1. Помогло ли Вам использование чат-бота?<br/>
     2. Опередили ли к какому виду интеллектуальной собственности относится Ваш объект?<br/>
     3. Ваши пожелания разработчикам`,
     action: feedbackAction,
+  },
+  [afterFeedbackAction]: {
+    message: "Спасибо за Ваше мнение! Это помогает мне совершенствоваться.",
+    buttons: [
+      {
+        text: "назад",
+        to: menu.toString(),
+      },
+    ],
   },
 
   // start Отличия полезной модели и изобретения
@@ -594,7 +604,7 @@ export const normalizedGraph: Record<string, MessageRaw> = {
       },
       {
         text: "назад",
-        to: "50",
+        to: menu.toString(),
       },
     ],
   },
@@ -664,7 +674,7 @@ export const normalizedGraph: Record<string, MessageRaw> = {
     buttons: [
       {
         text: "назад",
-        to: "50",
+        to: menu.toString(),
       },
     ],
   },
@@ -678,7 +688,7 @@ export const normalizedGraph: Record<string, MessageRaw> = {
     buttons: [
       {
         text: "назад",
-        to: "50",
+        to: menu.toString(),
       },
     ],
   },
@@ -705,7 +715,7 @@ export const normalizedGraph: Record<string, MessageRaw> = {
       },
       {
         text: "назад",
-        to: "50",
+        to: menu.toString(),
       },
     ],
   },
@@ -790,7 +800,7 @@ export const normalizedGraph: Record<string, MessageRaw> = {
       },
       {
         text: "Назад",
-        to: "50",
+        to: menu.toString(),
       },
     ],
   },
