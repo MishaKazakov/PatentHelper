@@ -74,6 +74,7 @@ const getInvoice = (id: string) => {
 
 async function renderMessage(i: number | string, ctx: Context) {
   const value = normalizedGraph[i];
+  console.log("renderMessage", i, value);
 
   await ctx.editMessageText(value.message, {
     parse_mode,
