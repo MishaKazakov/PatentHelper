@@ -29,12 +29,13 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
       const invoice = getInvoice(ctx.from?.id.toString()!);
       await ctx.replyWithInvoice(invoice);
     });
-  } else if (value.action === feedbackAction) {
-    bot.action(feedbackAction, (ctx) => {
-      renderMessage(feedbackAction, ctx).then(() => {
-        (ctx.session as any).feedback = true;
-      });
-    });
+  // } 
+  // else if (value.action === feedbackAction) {
+  //   bot.action(feedbackAction, (ctx) => {
+  //     renderMessage(feedbackAction, ctx).then(() => {
+  //       (ctx.session as any).feedback = true;
+  //     });
+  //   });
   } else if (value.buttons) {
     value.buttons.forEach((button) => {
       bot.action(button.to, (ctx) => {
@@ -49,6 +50,7 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
 });
 
 bot.on("message", (ctx) => {
+  console.log("listens to message");
   if ((ctx.session as any).feedback && ctx.message && "text" in ctx.message) {
     const userMessage = ctx.message.text;
     console.log(userMessage);
@@ -136,6 +138,7 @@ bot.start((ctx) => {
   const videoSource =
     "https://drive.usercontent.google.com/download?id=1gXfS8tNrTFloBbTwusWsg8SVqqg9k0Tq&export=view&authuser=0";
   ctx.replyWithVideo(videoSource).then(() => {
+    console.log("replyWithVideo", JSON.stringify(value));
     ctx.reply(value.message, {
       parse_mode,
       reply_markup: {
@@ -167,6 +170,7 @@ bot.on("successful_payment", async (ctx) => {
       )
     : Markup.inlineKeyboard([Markup.button.callback("К началу", "0")]);
 
+  console.log("successful_payment", JSON.stringify(value));
   ctx.reply(value.message, {
     parse_mode,
     reply_markup: {
