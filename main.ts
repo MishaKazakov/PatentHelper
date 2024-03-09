@@ -116,12 +116,16 @@ bot.start((ctx) => {
         )
       )
     : Markup.inlineKeyboard([Markup.button.callback("К началу", "0")]);
-  ctx.sendVideo({ source: videoBuffer });
-  ctx.reply(value.message, {
-    parse_mode,
-    reply_markup: {
-      inline_keyboard: buttons.reply_markup.inline_keyboard,
-    },
+
+  const videoSource =
+    "https://drive.usercontent.google.com/download?id=1gXfS8tNrTFloBbTwusWsg8SVqqg9k0Tq&export=view&authuser=0";
+  ctx.replyWithVideo(videoSource).then(() => {
+    ctx.reply(value.message, {
+      parse_mode,
+      reply_markup: {
+        inline_keyboard: buttons.reply_markup.inline_keyboard,
+      },
+    });
   });
 });
 
