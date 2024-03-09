@@ -1,10 +1,13 @@
 import { Context, Markup, Scenes, session, Telegraf } from "telegraf";
 import { InlineKeyboardButton } from "telegraf/typings/core/types/typegram";
 import { normalizedGraph, afterPayment } from "./normalizedGraph";
+import fs from "fs";
 
+const videoBuffer = fs.readFileSync("./video.mp4");
 type ButtonRaw = {
   text: string;
   to: string;
+  withVideo?: boolean;
 };
 
 export type MessageRaw = {
@@ -26,6 +29,9 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
     value.buttons.forEach((button) => {
       bot.action(button.to, (ctx) => {
         renderMessage(Number(button.to), ctx);
+        if (button.withVideo) {
+          ctx.sendVideo({ source: videoBuffer });
+        }
       });
     });
   } else {
@@ -42,7 +48,7 @@ const getInvoice = (id: string) => {
     start_parameter: "get_access", //Уникальный параметр глубинных ссылок\. Если оставить поле пустым, переадресованные копии отправленного сообщения будут иметь кнопку «Оплатить», позволяющую нескольким пользователям производить оплату непосредственно из пересылаемого сообщения, используя один и тот же счет\. Если не пусто, перенаправленные копии отправленного сообщения будут иметь кнопку URL с глубокой ссылкой на бота (вместо кнопки оплаты) со значением, используемым в качестве начального параметра\.
     title: "Консультация MyPriority_bot", // Название продукта, 1-32 символа
     description:
-      "Консультация MyPriority_bot по интеллектуальному праву\.\n Продолжая, Вы соглашаетесь с политикой обработки персональных данных", // Описание продукта, 1-255 знаков
+      "Консультация MyPriority_bot по интеллектуальному праву.\n Продолжая, Вы соглашаетесь с политикой обработки персональных данных", // Описание продукта, 1-255 знаков
     currency: "RUB", // Трехбуквенный код валюты ISO 4217
     prices: [{ label: "Консультация MyPriority_bot", amount: 500 * 100 }], // Разбивка цен, сериализованный список компонентов в формате JSON 100 копеек * 100 = 100 рублей
     payload: "payload",

@@ -2,6 +2,9 @@ import { MessageRaw } from "./main";
 
 const beforePayment = -3;
 export const afterPayment = 3;
+const touHref =
+  "https://docs.google.com/document/d/12HHIYafMzj_BW-TDYT5onap69mNN7HTwaJdoaDPKXU4/";
+
 export const normalizedGraph: Record<string, MessageRaw> = {
   0: {
     message: `Я с удовольствием расскажу вам об интересующем вас функционале. Что именно вас интересует?
@@ -14,6 +17,7 @@ export const normalizedGraph: Record<string, MessageRaw> = {
       {
         text: "Начать консультацию",
         to: beforePayment.toString(),
+        withVideo: true,
       },
     ],
   },
@@ -23,8 +27,7 @@ export const normalizedGraph: Record<string, MessageRaw> = {
       "Мы инициативная группа, которая хочет помочь молодым специалистам стать грамотнее в области интеллектуальной собственности!",
   },
   [beforePayment]: {
-    message:
-      'Для начала консультации, пожалуйста, произведите оплату. Продолжая, Вы соглашаетесь с <a href="https://example.com">политикой обработки персональных данных</a>',
+    message: `Для начала консультации, пожалуйста, произведите оплату. Продолжая, Вы соглашаетесь с <a href="${touHref}">политикой обработки персональных данных</a>`,
     action: "pay",
   },
   [afterPayment]: {
