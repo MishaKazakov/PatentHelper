@@ -5,6 +5,9 @@ export const afterPayment = 3;
 const touHref =
   "https://docs.google.com/document/d/12HHIYafMzj_BW-TDYT5onap69mNN7HTwaJdoaDPKXU4/";
 
+export const payAction = "pay";
+export const feedbackAction = "feedback";
+export const menu = 50;
 export const normalizedGraph: Record<string, MessageRaw> = {
   0: {
     message: `Я с удовольствием расскажу вам об интересующем вас функционале. Что именно вас интересует?
@@ -27,7 +30,7 @@ export const normalizedGraph: Record<string, MessageRaw> = {
   },
   [beforePayment]: {
     message: `Для начала консультации, пожалуйста, произведите оплату. Продолжая, Вы соглашаетесь с <a href="${touHref}">политикой обработки персональных данных</a>`,
-    action: "pay",
+    action: payAction,
   },
   [afterPayment]: {
     message: `Сейчас я буду задавать вам вопросы касающиеся вашей интеллектуальной собственности.
@@ -525,7 +528,7 @@ export const normalizedGraph: Record<string, MessageRaw> = {
     ],
   },
 
-  50: {
+  [menu]: {
     message: "Выберите один из вариантов",
     buttons: [
       {
@@ -549,10 +552,20 @@ export const normalizedGraph: Record<string, MessageRaw> = {
         to: "64",
       },
       {
+        text: "Обрантная связь",
+        to: feedbackAction,
+      },
+      {
         text: "К началу",
         to: "0",
       },
     ],
+  },
+  feedbackAction: {
+    message: `1. Помогло ли Вам использование чат-бота?<br/>
+    2. Опередили ли к какому виду интеллектуальной собственности относится Ваш объект?<br/>
+    3. Ваши пожелания разработчикам`,
+    action: feedbackAction,
   },
 
   // start Отличия полезной модели и изобретения

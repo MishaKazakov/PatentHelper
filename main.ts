@@ -1,37 +1,44 @@
 import { Context, Markup, Scenes, session, Telegraf } from "telegraf";
 import { InlineKeyboardButton } from "telegraf/typings/core/types/typegram";
-import { normalizedGraph, afterPayment } from "./normalizedGraph";
-import * as fs from "fs";
+import {
+  normalizedGraph,
+  afterPayment,
+  payAction,
+  feedbackAction,
+  menu,
+} from "./normalizedGraph";
 
-const videoBuffer = fs.readFileSync("./welcome.mp4");
 type ButtonRaw = {
   text: string;
   to: string;
-  withVideo?: boolean;
 };
 
 export type MessageRaw = {
   message: string;
   buttons?: ButtonRaw[];
-  action?: "pay";
+  action?: typeof payAction | typeof feedbackAction;
 };
 const token = process.env.token as string;
 
 const parse_mode = "HTML";
 const bot = new Telegraf<Scenes.WizardContext>(token);
 Object.entries(normalizedGraph).forEach(([, value]) => {
-  if (value.action === "pay") {
-    bot.action("pay", async (ctx) => {
+  if (value.action === payAction) {
+    bot.action(payAction, async (ctx) => {
       const invoice = getInvoice(ctx.from?.id.toString()!);
       await ctx.replyWithInvoice(invoice);
+    });
+  } else if (value.action === feedbackAction) {
+    bot.action(feedbackAction, (ctx) => {
+      renderMessage(feedbackAction, ctx);
+      bot.on("message", (ctx) => {
+        renderMessage(menu, ctx);
+      });
     });
   } else if (value.buttons) {
     value.buttons.forEach((button) => {
       bot.action(button.to, (ctx) => {
         renderMessage(Number(button.to), ctx);
-        if (button.withVideo) {
-          ctx.sendVideo({ source: videoBuffer });
-        }
       });
     });
   } else {
@@ -57,7 +64,7 @@ const getInvoice = (id: string) => {
   return invoice;
 };
 
-async function renderMessage(i: number, ctx: Context) {
+async function renderMessage(i: number | string, ctx: Context) {
   const value = normalizedGraph[i];
 
   await ctx.editMessageText(value.message, {
