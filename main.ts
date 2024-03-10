@@ -24,35 +24,6 @@ const token = process.env.token as string;
 const parse_mode = "HTML";
 const bot = new Telegraf<Scenes.WizardContext>(token);
 
-Object.entries(normalizedGraph).forEach(([, value]) => {
-  if (value.action === payAction) {
-    bot.action(payAction, async (ctx) => {
-      const invoice = getInvoice(ctx.from?.id.toString()!);
-      await ctx.replyWithInvoice(invoice);
-    });
-  } else if (value.action === feedbackAction) {
-    bot.action(feedbackAction, (ctx) => {
-      renderMessage(feedbackAction, ctx).then(() => {
-        (ctx.session as any) = {
-          feedback: true,
-        };
-      });
-    });
-  } else if (value.buttons) {
-    value.buttons.forEach((button) => {
-      bot.action(button.to, (ctx) => {
-        renderMessage(button.to, ctx);
-      });
-    });
-  } else {
-    bot.action("0", (ctx) => {
-      renderMessage(0, ctx);
-    });
-  }
-});
-
-
-
 const getInvoice = (id: string) => {
   const invoice = {
     chat_id: id, // Уникальный идентификатор целевого чата или имя пользователя целевого канала
@@ -143,7 +114,6 @@ bot.start((ctx) => {
   });
 });
 
-bot.use(session());
 bot.launch({
   webhook: {
     domain: process.env.domain!,
@@ -152,6 +122,7 @@ bot.launch({
 });
 
 console.log("bot has started");
+bot.use(session());
 
 bot.on("pre_checkout_query", (ctx) => ctx.answerPreCheckoutQuery(true));
 
@@ -172,6 +143,35 @@ bot.on("successful_payment", async (ctx) => {
       inline_keyboard: buttons.reply_markup.inline_keyboard,
     },
   });
+});
+
+
+
+Object.entries(normalizedGraph).forEach(([, value]) => {
+  if (value.action === payAction) {
+    bot.action(payAction, async (ctx) => {
+      const invoice = getInvoice(ctx.from?.id.toString()!);
+      await ctx.replyWithInvoice(invoice);
+    });
+  } else if (value.action === feedbackAction) {
+    bot.action(feedbackAction, (ctx) => {
+      renderMessage(feedbackAction, ctx).then(() => {
+        (ctx.session as any) = {
+          feedback: true,
+        };
+      });
+    });
+  } else if (value.buttons) {
+    value.buttons.forEach((button) => {
+      bot.action(button.to, (ctx) => {
+        renderMessage(button.to, ctx);
+      });
+    });
+  } else {
+    bot.action("0", (ctx) => {
+      renderMessage(0, ctx);
+    });
+  }
 });
 
 bot.on(message("text"), (ctx) => {
