@@ -40,8 +40,7 @@ const getInvoice = (id: string) => {
     provider_token: process.env.providerToken!, // токен выданный через бот @SberbankPaymentBot
     start_parameter: "get_access", //Уникальный параметр глубинных ссылок\. Если оставить поле пустым, переадресованные копии отправленного сообщения будут иметь кнопку «Оплатить», позволяющую нескольким пользователям производить оплату непосредственно из пересылаемого сообщения, используя один и тот же счет\. Если не пусто, перенаправленные копии отправленного сообщения будут иметь кнопку URL с глубокой ссылкой на бота (вместо кнопки оплаты) со значением, используемым в качестве начального параметра\.
     title: "Консультация MyPriority_bot", // Название продукта, 1-32 символа
-    description:
-      "Консультация MyPriority_bot по интеллектуальному праву.", // Описание продукта, 1-255 знаков
+    description: "Консультация MyPriority_bot по интеллектуальному праву.", // Описание продукта, 1-255 знаков
     currency: "RUB", // Трехбуквенный код валюты ISO 4217
     prices: [{ label: "Консультация MyPriority_bot", amount: 500 * 100 }], // Разбивка цен, сериализованный список компонентов в формате JSON 100 копеек * 100 = 100 рублей
     payload: "payload",
@@ -183,8 +182,8 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
     });
   } else if (value.buttons) {
     value.buttons.forEach((button) => {
-      console.log("session", JSON.stringify(fakeSession));
       bot.action(button.to, async (ctx) => {
+        console.log("session", JSON.stringify(fakeSession));
         if (ctx.from?.username) {
           fakeSession[ctx.from.username] = { feedback: true };
         }
@@ -201,7 +200,10 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
 bot.on(message("text"), async (ctx) => {
   if (ctx.from.username && fakeSession[ctx.from.username].feedback) {
     fakeSession[ctx.from.username].feedback = false;
-    bot.telegram.sendMessage('@reviews_from_bot', `Отзыв от @${ctx.from.username}: ${ctx.message.text}`);
-    await renderMessage({ index: afterFeedbackAction, ctx, isNew: true});
+    bot.telegram.sendMessage(
+      "@reviews_from_bot",
+      `Отзыв от @${ctx.from.username}: ${ctx.message.text}`
+    );
+    await renderMessage({ index: afterFeedbackAction, ctx, isNew: true });
   }
 });
