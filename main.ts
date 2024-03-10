@@ -178,15 +178,15 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
     });
   } else if (value.action === feedbackAction) {
     bot.action(feedbackAction, async (ctx) => {
+      if (ctx.from?.username) {
+        fakeSession[ctx.from.username] = { feedback: true };
+      }
       await renderMessage({ index: feedbackAction, ctx });
     });
   } else if (value.buttons) {
     value.buttons.forEach((button) => {
       bot.action(button.to, async (ctx) => {
         console.log("session", JSON.stringify(fakeSession));
-        if (ctx.from?.username) {
-          fakeSession[ctx.from.username] = { feedback: true };
-        }
         await renderMessage({ index: button.to, ctx });
       });
     });
