@@ -145,8 +145,6 @@ bot.on("successful_payment", async (ctx) => {
   });
 });
 
-
-
 Object.entries(normalizedGraph).forEach(([, value]) => {
   if (value.action === payAction) {
     bot.action(payAction, async (ctx) => {
@@ -155,12 +153,10 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
     });
   } else if (value.action === feedbackAction) {
     bot.action(feedbackAction, (ctx) => {
-      renderMessage(feedbackAction, ctx).then(() => {
-        console.log('renders feedback and sets session');
-        (ctx.session as any) = {
-          feedback: true,
-        };
-      });
+      (ctx.session as any) = {
+        feedback: true,
+      };
+      renderMessage(feedbackAction, ctx);
     });
   } else if (value.buttons) {
     value.buttons.forEach((button) => {
