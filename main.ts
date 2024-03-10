@@ -35,7 +35,7 @@ const parse_mode = "HTML";
 const bot = new Telegraf<MyContext>(token);
 bot.use(session({ defaultSession: () => ({ feedback: false }) }));
 
-const amountInRub = 1;
+const amountInRub = 10;
 const getInvoice = (id: string) => {
   const invoice = {
     chat_id: id, // Уникальный идентификатор целевого чата или имя пользователя целевого канала
