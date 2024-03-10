@@ -201,8 +201,7 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
 bot.on(message("text"), async (ctx) => {
   if (ctx.from.username && fakeSession[ctx.from.username].feedback) {
     fakeSession[ctx.from.username].feedback = false;
-    bot.telegram.sendMessage('@reviews_from_bot', `Отзыв от ${ctx.from.username}: ${ctx.message.text}`);
-    await renderMessage({ index: afterFeedbackAction, ctx });
-    ctx.deleteMessage(ctx.message.message_id);
+    bot.telegram.sendMessage('@reviews_from_bot', `Отзыв от @${ctx.from.username}: ${ctx.message.text}`);
+    await renderMessage({ index: afterFeedbackAction, ctx, isNew: true});
   }
 });

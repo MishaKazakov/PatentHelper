@@ -486,7 +486,7 @@ export const normalizedGraph: Record<string, MessageRaw> = {
   },
   46: {
     message: `Поздравляю!
-    На Ваш объект возможно получить патент на ИЗОБРЕТЕНИЕ.
+На Ваш объект возможно получить патент на ИЗОБРЕТЕНИЕ.
     `,
     buttons: [
       {
