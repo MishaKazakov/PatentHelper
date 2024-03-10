@@ -47,11 +47,20 @@ const getInvoice = (id: string) => {
   return invoice;
 };
 
-async function renderMessage(i: number | string, ctx: Context) {
-  const value = normalizedGraph[i];
-  console.log("renderMessage", i, value);
+async function renderMessage({
+  index,
+  ctx,
+  isNew,
+}: {
+  index: number | string;
+  ctx: Context;
+  isNew?: boolean;
+}) {
+  const value = normalizedGraph[index];
+  console.log("renderMessage", index, value);
+  const method = (isNew ? ctx.reply : ctx.editMessageText) as Context["reply"];
 
-  return ctx.editMessageText(value.message, {
+  return method(value.message, {
     parse_mode,
     reply_markup: {
       inline_keyboard:
@@ -150,8 +159,7 @@ bot.on("successful_payment", async (ctx) => {
     },
   });
 });
-const _fakeSession: Record<string, { feedback: boolean }> = {};
-
+const fakeSession: Record<string, { feedback: boolean }> = {};
 
 Object.entries(normalizedGraph).forEach(([, value]) => {
   if (value.action === payAction) {
@@ -161,32 +169,27 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
     });
   } else if (value.action === feedbackAction) {
     bot.action(feedbackAction, async (ctx) => {
-      await renderMessage(feedbackAction, ctx);
+      await renderMessage({ index: feedbackAction, ctx });
     });
   } else if (value.buttons) {
     value.buttons.forEach((button) => {
       bot.action(button.to, async (ctx) => {
-        console.log(ctx.from);
-        // const member = await ctx.getChatMember(ctx.from?.id!);
-        // if (member.user.username) {
-        //   fakeSession[member.user.username] = { feedback: true };
-        // }
-        await renderMessage(button.to, ctx);
+        if (ctx.from?.username) {
+          fakeSession[ctx.from.username] = { feedback: true };
+        }
+        await renderMessage({ index: button.to, ctx });
       });
     });
   } else {
     bot.action("0", async (ctx) => {
-      await renderMessage(0, ctx);
+      await renderMessage({ index: 0, ctx });
     });
   }
 });
 
 bot.on(message("text"), async (ctx) => {
-  console.log("message", ctx.message.text);
-  console.log(JSON.stringify(ctx.session));
-  if (ctx.session.feedback) {
-    const userMessage = ctx.message.text;
-    console.log(userMessage);
-    await renderMessage(afterFeedbackAction, ctx);
+  if (ctx.from.username && fakeSession[ctx.from.username].feedback) {
+    fakeSession[ctx.from.username].feedback = false;
+    await renderMessage({ index: afterFeedbackAction, ctx, isNew: true});
   }
 });
