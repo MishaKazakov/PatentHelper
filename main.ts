@@ -114,7 +114,9 @@ function prepareButtons(buttons?: ButtonRaw[]): InlineKeyboardButton[][] {
 }
 
 bot.start((ctx) => {
-  ctx.from?.username && (fakeSession[ctx.from.username] = {});
+  if (ctx.from.username && !fakeSession[ctx.from.username]) {
+    fakeSession[ctx.from.username] = {};
+  }
   const value = normalizedGraph[0];
   const buttons = value.buttons
     ? Markup.inlineKeyboard(
