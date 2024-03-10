@@ -50,8 +50,13 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
   }
 });
 
-bot.on("text", (ctx) => {
-  if ((ctx.session as any).feedback && ctx.message && "text" in ctx.message) {
+bot.on("message", (ctx) => {
+  if (
+    ctx.session &&
+    (ctx.session as any).feedback &&
+    ctx.message &&
+    "text" in ctx.message
+  ) {
     const userMessage = ctx.message.text;
     console.log(userMessage);
     renderMessage(afterFeedbackAction, ctx);
