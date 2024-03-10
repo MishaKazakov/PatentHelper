@@ -49,8 +49,7 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
 });
 
 bot.on("message", (ctx) => {
-  console.log("listens to message");
-  console.log(JSON.stringify(ctx.message));
+  console.log(JSON.stringify(ctx.session));
   // if ((ctx.session as any).feedback && ctx.message && "text" in ctx.message) {
   //   const userMessage = ctx.message.text;
   //   console.log(userMessage);
