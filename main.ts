@@ -21,9 +21,15 @@ export type MessageRaw = {
 };
 const token = process.env.token as string;
 
+interface MyContext extends Context {
+	session: {
+		feedback: boolean
+	},
+};
+
 const parse_mode = "HTML";
-const bot = new Telegraf<Scenes.WizardContext>(token);
-bot.use(session());
+const bot = new Telegraf<MyContext>(token);
+bot.use(session({ defaultSession: () => ({ feedback: false }) }));
 
 const getInvoice = (id: string) => {
   const invoice = {
@@ -153,9 +159,7 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
     });
   } else if (value.action === feedbackAction) {
     bot.action(feedbackAction, (ctx) => {
-      (ctx.session as any) = {
-        feedback: true,
-      };
+      ctx.session.feedback = true;
       renderMessage(feedbackAction, ctx);
     });
   } else if (value.buttons) {
@@ -174,7 +178,7 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
 bot.on(message("text"), (ctx) => {
   console.log("message", ctx.message.text);
   console.log(JSON.stringify(ctx.session));
-  if (ctx.session && (ctx.session as any).feedback && ctx.message.text) {
+  if (ctx.session.feedback) {
     const userMessage = ctx.message.text;
     console.log(userMessage);
     renderMessage(afterFeedbackAction, ctx);
