@@ -23,6 +23,7 @@ const token = process.env.token as string;
 
 const parse_mode = "HTML";
 const bot = new Telegraf<Scenes.WizardContext>(token);
+bot.use(session());
 
 const getInvoice = (id: string) => {
   const invoice = {
@@ -122,7 +123,6 @@ bot.launch({
 });
 
 console.log("bot has started");
-bot.use(session());
 
 bot.on("pre_checkout_query", (ctx) => ctx.answerPreCheckoutQuery(true));
 
