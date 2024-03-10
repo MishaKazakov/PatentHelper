@@ -35,6 +35,7 @@ const parse_mode = "HTML";
 const bot = new Telegraf<MyContext>(token);
 bot.use(session({ defaultSession: () => ({ feedback: false }) }));
 
+const amountInRub = 1;
 const getInvoice = (id: string) => {
   const invoice = {
     chat_id: id, // Уникальный идентификатор целевого чата или имя пользователя целевого канала
@@ -43,7 +44,7 @@ const getInvoice = (id: string) => {
     title: "Консультация MyPriority_bot", // Название продукта, 1-32 символа
     description: "Консультация MyPriority_bot по интеллектуальному праву.", // Описание продукта, 1-255 знаков
     currency: "RUB", // Трехбуквенный код валюты ISO 4217
-    prices: [{ label: "Консультация MyPriority_bot", amount: 500 * 100 }], // Разбивка цен, сериализованный список компонентов в формате JSON 100 копеек * 100 = 100 рублей
+    prices: [{ label: "Консультация MyPriority_bot", amount: amountInRub * 100 }], // Разбивка цен, сериализованный список компонентов в формате JSON 100 копеек * 100 = 100 рублей
     payload: "payload",
   };
 
