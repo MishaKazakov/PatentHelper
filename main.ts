@@ -156,6 +156,7 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
   } else if (value.action === feedbackAction) {
     bot.action(feedbackAction, (ctx) => {
       renderMessage(feedbackAction, ctx).then(() => {
+        console.log('renders feedback and sets session');
         (ctx.session as any) = {
           feedback: true,
         };
