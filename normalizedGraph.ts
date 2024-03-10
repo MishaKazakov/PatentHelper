@@ -1,6 +1,6 @@
 import { MessageRaw } from "./main";
 
-const beforePayment = -3;
+export const beforePayment = -3;
 export const afterPayment = 3;
 const touHref =
   "https://docs.google.com/document/d/12HHIYafMzj_BW-TDYT5onap69mNN7HTwaJdoaDPKXU4/";

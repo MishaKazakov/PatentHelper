@@ -7,6 +7,7 @@ import {
   payAction,
   feedbackAction,
   afterFeedbackAction,
+  beforePayment,
 } from "./normalizedGraph";
 
 type ButtonRaw = {
@@ -169,23 +170,35 @@ bot.on("successful_payment", async (ctx) => {
 Object.entries(normalizedGraph).forEach(([, value]) => {
   if (value.action === payAction) {
     bot.action(payAction, async (ctx) => {
-      if (ctx.from?.username && fakeSession[ctx.from.username].isPayed) {
-        await renderMessage({ index: afterPayment, ctx });
-        return;
-      }
       const invoice = getInvoice(ctx.from?.id.toString()!);
       await ctx.replyWithInvoice(invoice);
     });
   } else if (value.action === feedbackAction) {
     bot.action(feedbackAction, async (ctx) => {
-      if (ctx.from?.username) {
-        fakeSession[ctx.from.username] = { feedback: true };
-      }
       await renderMessage({ index: feedbackAction, ctx });
     });
   } else if (value.buttons) {
     value.buttons.forEach((button) => {
       bot.action(button.to, async (ctx) => {
+        const to = button.to.toString();
+
+        if (
+          ctx.from?.username &&
+          to === beforePayment.toString() &&
+          fakeSession[ctx.from.username].isPayed
+        ) {
+          await renderMessage({ index: afterPayment, ctx });
+          return;
+        }
+
+        if (ctx.from?.username) {
+          if (to === feedbackAction.toString()) {
+            fakeSession[ctx.from.username] = { feedback: true };
+          } else {
+            fakeSession[ctx.from.username] = { feedback: false };
+          }
+        }
+
         console.log("session", JSON.stringify(fakeSession));
         await renderMessage({ index: button.to, ctx });
       });
