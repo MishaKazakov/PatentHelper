@@ -182,7 +182,9 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
     value.buttons.forEach((button) => {
       bot.action(button.to, async (ctx) => {
         const to = button.to.toString();
-
+        console.log("to", to);
+        console.log("fakeSession", fakeSession);
+        console.log("ctx.from?.username", ctx.from?.username);
         if (
           ctx.from?.username &&
           to === beforePayment.toString() &&
