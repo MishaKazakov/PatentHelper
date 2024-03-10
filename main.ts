@@ -150,7 +150,21 @@ bot.on("successful_payment", async (ctx) => {
     },
   });
 });
-const fakeSession = {};
+const _fakeSession: Record<string, { feedback: boolean }> = {};
+
+const replacerFunc = () => {
+  const visited = new WeakSet();
+  return (key, value) => {
+    if (typeof value === "object" && value !== null) {
+      if (visited.has(value)) {
+        return;
+      }
+      visited.add(value);
+    }
+    return value;
+  };
+};
+
 Object.entries(normalizedGraph).forEach(([, value]) => {
   if (value.action === payAction) {
     bot.action(payAction, async (ctx) => {
@@ -164,7 +178,11 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
   } else if (value.buttons) {
     value.buttons.forEach((button) => {
       bot.action(button.to, async (ctx) => {
-        console.log(JSON.stringify(ctx));
+        console.log(JSON.stringify(ctx.session, replacerFunc));
+        // const member = await ctx.getChatMember(ctx.from?.id!);
+        // if (member.user.username) {
+        //   fakeSession[member.user.username] = { feedback: true };
+        // }
         await renderMessage(button.to, ctx);
       });
     });
