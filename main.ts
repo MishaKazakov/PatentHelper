@@ -14,6 +14,9 @@ type ButtonRaw = {
   to: string;
 };
 
+type DB = Record<string, { feedback?: boolean; isPayed?: boolean }>;
+const fakeSession: DB = {};
+
 export type MessageRaw = {
   message: string;
   buttons?: ButtonRaw[];
@@ -38,7 +41,7 @@ const getInvoice = (id: string) => {
     start_parameter: "get_access", //Уникальный параметр глубинных ссылок\. Если оставить поле пустым, переадресованные копии отправленного сообщения будут иметь кнопку «Оплатить», позволяющую нескольким пользователям производить оплату непосредственно из пересылаемого сообщения, используя один и тот же счет\. Если не пусто, перенаправленные копии отправленного сообщения будут иметь кнопку URL с глубокой ссылкой на бота (вместо кнопки оплаты) со значением, используемым в качестве начального параметра\.
     title: "Консультация MyPriority_bot", // Название продукта, 1-32 символа
     description:
-      "Консультация MyPriority_bot по интеллектуальному праву.\n Продолжая, Вы соглашаетесь с политикой обработки персональных данных", // Описание продукта, 1-255 знаков
+      "Консультация MyPriority_bot по интеллектуальному праву.", // Описание продукта, 1-255 знаков
     currency: "RUB", // Трехбуквенный код валюты ISO 4217
     prices: [{ label: "Консультация MyPriority_bot", amount: 500 * 100 }], // Разбивка цен, сериализованный список компонентов в формате JSON 100 копеек * 100 = 100 рублей
     payload: "payload",
@@ -144,6 +147,9 @@ console.log("bot has started");
 bot.on("pre_checkout_query", (ctx) => ctx.answerPreCheckoutQuery(true));
 
 bot.on("successful_payment", async (ctx) => {
+  if (ctx.from.username) {
+    fakeSession[ctx.from.username] = { isPayed: true };
+  }
   const value = normalizedGraph[afterPayment];
   const buttons = value.buttons
     ? Markup.inlineKeyboard(
@@ -160,11 +166,14 @@ bot.on("successful_payment", async (ctx) => {
     },
   });
 });
-const fakeSession: Record<string, { feedback: boolean }> = {};
 
 Object.entries(normalizedGraph).forEach(([, value]) => {
   if (value.action === payAction) {
     bot.action(payAction, async (ctx) => {
+      if (ctx.from?.username && fakeSession[ctx.from.username].isPayed) {
+        await renderMessage({ index: afterPayment, ctx });
+        return;
+      }
       const invoice = getInvoice(ctx.from?.id.toString()!);
       await ctx.replyWithInvoice(invoice);
     });
@@ -174,6 +183,7 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
     });
   } else if (value.buttons) {
     value.buttons.forEach((button) => {
+      console.log("session", JSON.stringify(fakeSession));
       bot.action(button.to, async (ctx) => {
         if (ctx.from?.username) {
           fakeSession[ctx.from.username] = { feedback: true };
@@ -191,7 +201,8 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
 bot.on(message("text"), async (ctx) => {
   if (ctx.from.username && fakeSession[ctx.from.username].feedback) {
     fakeSession[ctx.from.username].feedback = false;
-    console.log("message", { from: ctx.from.username, message: ctx.message.text});
-    await renderMessage({ index: afterFeedbackAction, ctx, isNew: true });
+    bot.telegram.sendMessage('@reviews_from_bot', `Отзыв от ${ctx.from.username}: ${ctx.message.text}`);
+    await renderMessage({ index: afterFeedbackAction, ctx });
+    ctx.deleteMessage(ctx.message.message_id);
   }
 });
