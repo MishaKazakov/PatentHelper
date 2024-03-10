@@ -50,11 +50,12 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
 
 bot.on("message", (ctx) => {
   console.log("listens to message");
-  if ((ctx.session as any).feedback && ctx.message && "text" in ctx.message) {
-    const userMessage = ctx.message.text;
-    console.log(userMessage);
-    renderMessage(afterFeedbackAction, ctx);
-  }
+  console.log(JSON.stringify(ctx.message));
+  // if ((ctx.session as any).feedback && ctx.message && "text" in ctx.message) {
+  //   const userMessage = ctx.message.text;
+  //   console.log(userMessage);
+  //   renderMessage(afterFeedbackAction, ctx);
+  // }
 });
 
 const getInvoice = (id: string) => {
