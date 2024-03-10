@@ -114,6 +114,7 @@ function prepareButtons(buttons?: ButtonRaw[]): InlineKeyboardButton[][] {
 }
 
 bot.start((ctx) => {
+  ctx.from?.username && (fakeSession[ctx.from.username] = {});
   const value = normalizedGraph[0];
   const buttons = value.buttons
     ? Markup.inlineKeyboard(
@@ -148,7 +149,7 @@ bot.on("pre_checkout_query", (ctx) => ctx.answerPreCheckoutQuery(true));
 
 bot.on("successful_payment", async (ctx) => {
   if (ctx.from.username) {
-    fakeSession[ctx.from.username] = { isPayed: true };
+    fakeSession[ctx.from.username].isPayed = true;
   }
   const value = normalizedGraph[afterPayment];
   const buttons = value.buttons
@@ -193,9 +194,9 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
 
         if (ctx.from?.username) {
           if (to === feedbackAction.toString()) {
-            fakeSession[ctx.from.username] = { feedback: true };
+            fakeSession[ctx.from.username].feedback = true;
           } else {
-            fakeSession[ctx.from.username] = { feedback: false };
+            fakeSession[ctx.from.username].feedback = false;
           }
         }
 
