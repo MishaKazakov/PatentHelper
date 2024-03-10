@@ -178,7 +178,7 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
   } else if (value.buttons) {
     value.buttons.forEach((button) => {
       bot.action(button.to, async (ctx) => {
-        console.log(JSON.stringify(ctx.session, replacerFunc));
+        console.log(JSON.stringify(ctx, replacerFunc));
         // const member = await ctx.getChatMember(ctx.from?.id!);
         // if (member.user.username) {
         //   fakeSession[member.user.username] = { feedback: true };
