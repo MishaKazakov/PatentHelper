@@ -175,6 +175,8 @@ bot.on("successful_payment", async (ctx) => {
 });
 
 bot.on(message("text"), (ctx) => {
+  console.log("message", ctx.message.text);
+  console.log(JSON.stringify(ctx.session));
   if (ctx.session && (ctx.session as any).feedback && ctx.message.text) {
     const userMessage = ctx.message.text;
     console.log(userMessage);
