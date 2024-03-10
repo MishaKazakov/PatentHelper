@@ -58,9 +58,7 @@ async function renderMessage({
 }) {
   const value = normalizedGraph[index];
   console.log("renderMessage", index, value);
-  const method = (isNew ? ctx.reply : ctx.editMessageText) as Context["reply"];
-
-  return method(value.message, {
+  const params = {
     parse_mode,
     reply_markup: {
       inline_keyboard:
@@ -75,7 +73,13 @@ async function renderMessage({
             ]
           : prepareButtons(value.buttons),
     },
-  });
+  } as const;
+
+  if (isNew) {
+    return ctx.reply(value.message, params);
+  }
+
+  return ctx.editMessageText(value.message, params);
 }
 
 function prepareButtons(buttons?: ButtonRaw[]): InlineKeyboardButton[][] {
@@ -190,6 +194,6 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
 bot.on(message("text"), async (ctx) => {
   if (ctx.from.username && fakeSession[ctx.from.username].feedback) {
     fakeSession[ctx.from.username].feedback = false;
-    await renderMessage({ index: afterFeedbackAction, ctx, isNew: true});
+    await renderMessage({ index: afterFeedbackAction, ctx, isNew: true });
   }
 });
