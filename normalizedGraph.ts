@@ -578,7 +578,7 @@ export const normalizedGraph: Record<string, MessageRaw> = {
     message: "Спасибо за Ваше мнение! Это помогает мне совершенствоваться.",
     buttons: [
       {
-        text: "назад",
+        text: "далее",
         to: menu.toString(),
       },
     ],

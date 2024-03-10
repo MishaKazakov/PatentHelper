@@ -57,7 +57,6 @@ async function renderMessage({
   isNew?: boolean;
 }) {
   const value = normalizedGraph[index];
-  console.log("renderMessage", index, value);
   const params = {
     parse_mode,
     reply_markup: {
@@ -124,7 +123,6 @@ bot.start((ctx) => {
   const videoSource =
     "https://drive.usercontent.google.com/download?id=1gXfS8tNrTFloBbTwusWsg8SVqqg9k0Tq&export=view&authuser=0";
   ctx.replyWithVideo(videoSource).then(async () => {
-    console.log("replyWithVideo", JSON.stringify(value));
     await ctx.reply(value.message, {
       parse_mode,
       reply_markup: {
@@ -155,7 +153,6 @@ bot.on("successful_payment", async (ctx) => {
       )
     : Markup.inlineKeyboard([Markup.button.callback("К началу", "0")]);
 
-  console.log("successful_payment", JSON.stringify(value));
   await ctx.reply(value.message, {
     parse_mode,
     reply_markup: {
@@ -194,6 +191,7 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
 bot.on(message("text"), async (ctx) => {
   if (ctx.from.username && fakeSession[ctx.from.username].feedback) {
     fakeSession[ctx.from.username].feedback = false;
+    console.log("message", { from: ctx.from.username, message: ctx.message.text});
     await renderMessage({ index: afterFeedbackAction, ctx, isNew: true });
   }
 });
