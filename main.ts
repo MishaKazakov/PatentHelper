@@ -22,10 +22,10 @@ export type MessageRaw = {
 const token = process.env.token as string;
 
 interface MyContext extends Context {
-	session: {
-		feedback: boolean
-	},
-};
+  session: {
+    feedback: boolean;
+  };
+}
 
 const parse_mode = "HTML";
 const bot = new Telegraf<MyContext>(token);
@@ -51,7 +51,7 @@ async function renderMessage(i: number | string, ctx: Context) {
   const value = normalizedGraph[i];
   console.log("renderMessage", i, value);
 
-  await ctx.editMessageText(value.message, {
+  return ctx.editMessageText(value.message, {
     parse_mode,
     reply_markup: {
       inline_keyboard:
@@ -150,7 +150,7 @@ bot.on("successful_payment", async (ctx) => {
     },
   });
 });
-
+const fakeSession = {};
 Object.entries(normalizedGraph).forEach(([, value]) => {
   if (value.action === payAction) {
     bot.action(payAction, async (ctx) => {
@@ -158,29 +158,29 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
       await ctx.replyWithInvoice(invoice);
     });
   } else if (value.action === feedbackAction) {
-    bot.action(feedbackAction, (ctx) => {
-      ctx.session.feedback = true;
-      renderMessage(feedbackAction, ctx);
+    bot.action(feedbackAction, async (ctx) => {
+      await renderMessage(feedbackAction, ctx);
     });
   } else if (value.buttons) {
     value.buttons.forEach((button) => {
-      bot.action(button.to, (ctx) => {
-        renderMessage(button.to, ctx);
+      bot.action(button.to, async (ctx) => {
+        console.log(JSON.stringify(ctx));
+        await renderMessage(button.to, ctx);
       });
     });
   } else {
-    bot.action("0", (ctx) => {
-      renderMessage(0, ctx);
+    bot.action("0", async (ctx) => {
+      await renderMessage(0, ctx);
     });
   }
 });
 
-bot.on(message("text"), (ctx) => {
+bot.on(message("text"), async (ctx) => {
   console.log("message", ctx.message.text);
   console.log(JSON.stringify(ctx.session));
   if (ctx.session.feedback) {
     const userMessage = ctx.message.text;
     console.log(userMessage);
-    renderMessage(afterFeedbackAction, ctx);
+    await renderMessage(afterFeedbackAction, ctx);
   }
 });
