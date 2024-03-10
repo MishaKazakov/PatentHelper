@@ -1,4 +1,5 @@
 import { Context, Markup, Scenes, session, Telegraf } from "telegraf";
+import { message } from "telegraf/filters";
 import { InlineKeyboardButton } from "telegraf/typings/core/types/typegram";
 import {
   normalizedGraph,
@@ -50,18 +51,7 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
   }
 });
 
-bot.on("message", (ctx) => {
-  if (
-    ctx.session &&
-    (ctx.session as any).feedback &&
-    ctx.message &&
-    "text" in ctx.message
-  ) {
-    const userMessage = ctx.message.text;
-    console.log(userMessage);
-    renderMessage(afterFeedbackAction, ctx);
-  }
-});
+
 
 const getInvoice = (id: string) => {
   const invoice = {
@@ -142,9 +132,9 @@ bot.start((ctx) => {
 
   const videoSource =
     "https://drive.usercontent.google.com/download?id=1gXfS8tNrTFloBbTwusWsg8SVqqg9k0Tq&export=view&authuser=0";
-  ctx.replyWithVideo(videoSource).then(() => {
+  ctx.replyWithVideo(videoSource).then(async () => {
     console.log("replyWithVideo", JSON.stringify(value));
-    ctx.reply(value.message, {
+    await ctx.reply(value.message, {
       parse_mode,
       reply_markup: {
         inline_keyboard: buttons.reply_markup.inline_keyboard,
@@ -176,10 +166,18 @@ bot.on("successful_payment", async (ctx) => {
     : Markup.inlineKeyboard([Markup.button.callback("К началу", "0")]);
 
   console.log("successful_payment", JSON.stringify(value));
-  ctx.reply(value.message, {
+  await ctx.reply(value.message, {
     parse_mode,
     reply_markup: {
       inline_keyboard: buttons.reply_markup.inline_keyboard,
     },
   });
+});
+
+bot.on(message("text"), (ctx) => {
+  if (ctx.session && (ctx.session as any).feedback && ctx.message.text) {
+    const userMessage = ctx.message.text;
+    console.log(userMessage);
+    renderMessage(afterFeedbackAction, ctx);
+  }
 });
