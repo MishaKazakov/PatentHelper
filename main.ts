@@ -32,7 +32,9 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
   } else if (value.action === feedbackAction) {
     bot.action(feedbackAction, (ctx) => {
       renderMessage(feedbackAction, ctx).then(() => {
-        (ctx.session as any).feedback = true;
+        (ctx.session as any) = {
+          feedback: true,
+        };
       });
     });
   } else if (value.buttons) {
@@ -48,13 +50,12 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
   }
 });
 
-bot.on("message", (ctx) => {
-  console.log(JSON.stringify(ctx.session));
-  // if ((ctx.session as any).feedback && ctx.message && "text" in ctx.message) {
-  //   const userMessage = ctx.message.text;
-  //   console.log(userMessage);
-  //   renderMessage(afterFeedbackAction, ctx);
-  // }
+bot.on("text", (ctx) => {
+  if ((ctx.session as any).feedback && ctx.message && "text" in ctx.message) {
+    const userMessage = ctx.message.text;
+    console.log(userMessage);
+    renderMessage(afterFeedbackAction, ctx);
+  }
 });
 
 const getInvoice = (id: string) => {
