@@ -30,7 +30,7 @@ export const normalizedGraph: Record<string, MessageRaw> = {
       "Мы инициативная группа, которая хочет помочь молодым специалистам стать грамотнее в области интеллектуальной собственности!",
   },
   [beforePayment]: {
-    message: `Для начала консультации, пожалуйста, произведите оплату. Продолжая, Вы соглашаетесь с <a href="${touHref}">политикой обработки персональных данных</a>`,
+    message: `Продолжая, Вы соглашаетесь с <a href="${touHref}">политикой обработки персональных данных</a>`,
     action: payAction,
   },
   [afterPayment]: {
@@ -553,7 +553,7 @@ export const normalizedGraph: Record<string, MessageRaw> = {
         to: "64",
       },
       {
-        text: "Обрантная связь",
+        text: "Обратная связь",
         to: feedbackAction,
       },
       {
