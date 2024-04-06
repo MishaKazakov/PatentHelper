@@ -8,6 +8,8 @@ import {
   feedbackAction,
   afterFeedbackAction,
   beforePayment,
+  promoCodeAction,
+  failedPromoCode,
 } from "./normalizedGraph";
 
 type ButtonRaw = {
@@ -15,13 +17,30 @@ type ButtonRaw = {
   to: string;
 };
 
-type DB = Record<string, { feedback?: boolean; isPayed?: boolean }>;
-const fakeSession: DB = {};
+type DB = Record<
+  string,
+  {
+    feedback?: boolean;
+    inPromoCode?: boolean;
+    isPayed?: boolean;
+    usedPromoCode?: boolean;
+  }
+>;
+const fakeSession: DB = {
+  sadkova_law: { feedback: false },
+  svetskyi: { feedback: false },
+  ankkadamsell: { feedback: false },
+  Neuroleg: { feedback: false },
+  AlexandraFrolova2905: { feedback: false },
+  Med1020: { feedback: false, isPayed: true },
+  elenavasiakina: { feedback: false, isPayed: true },
+  nadya9999: {},
+};
 
 export type MessageRaw = {
   message: string;
   buttons?: ButtonRaw[];
-  action?: typeof payAction | typeof feedbackAction;
+  action?: typeof payAction | typeof feedbackAction | typeof promoCodeAction;
 };
 const token = process.env.token as string;
 
@@ -42,9 +61,12 @@ const getInvoice = (id: string) => {
     provider_token: process.env.providerToken!, // токен выданный через бот @SberbankPaymentBot
     start_parameter: "get_access", //Уникальный параметр глубинных ссылок\. Если оставить поле пустым, переадресованные копии отправленного сообщения будут иметь кнопку «Оплатить», позволяющую нескольким пользователям производить оплату непосредственно из пересылаемого сообщения, используя один и тот же счет\. Если не пусто, перенаправленные копии отправленного сообщения будут иметь кнопку URL с глубокой ссылкой на бота (вместо кнопки оплаты) со значением, используемым в качестве начального параметра\.
     title: "Консультация MyPriority_bot", // Название продукта, 1-32 символа
-    description: "Постоянный доступ к чат-боту по защите интеллектуальной собственности", // Описание продукта, 1-255 знаков
+    description:
+      "Постоянный доступ к чат-боту по защите интеллектуальной собственности", // Описание продукта, 1-255 знаков
     currency: "RUB", // Трехбуквенный код валюты ISO 4217
-    prices: [{ label: "Консультация MyPriority_bot", amount: amountInRub * 100 }], // Разбивка цен, сериализованный список компонентов в формате JSON 100 копеек * 100 = 100 рублей
+    prices: [
+      { label: "Консультация MyPriority_bot", amount: amountInRub * 100 },
+    ], // Разбивка цен, сериализованный список компонентов в формате JSON 100 копеек * 100 = 100 рублей
     payload: "payload",
   };
 
@@ -63,19 +85,7 @@ async function renderMessage({
   const value = normalizedGraph[index];
   const params = {
     parse_mode,
-    reply_markup: {
-      inline_keyboard:
-        value.action === "pay"
-          ? [
-              [
-                {
-                  text: "Оплатить",
-                  callback_data: "pay",
-                },
-              ],
-            ]
-          : prepareButtons(value.buttons),
-    },
+    reply_markup: getReplyMarkupForAction(value),
   } as const;
 
   if (isNew) {
@@ -83,6 +93,35 @@ async function renderMessage({
   }
 
   return ctx.editMessageText(value.message, params);
+}
+
+function getReplyMarkupForAction(value: MessageRaw) {
+  if (value.action === payAction) {
+    return {
+      inline_keyboard: [
+        [
+          {
+            text: "Оплатить",
+            callback_data: payAction,
+          },
+        ],
+        [
+          {
+            text: "Ввести промокод",
+            callback_data: promoCodeAction,
+          },
+        ],
+      ],
+    };
+  }
+
+  if (value.action === promoCodeAction) {
+    return undefined;
+  }
+
+  return {
+    inline_keyboard: prepareButtons(value.buttons),
+  };
 }
 
 function prepareButtons(buttons?: ButtonRaw[]): InlineKeyboardButton[][] {
@@ -177,6 +216,14 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
       const invoice = getInvoice(ctx.from?.id.toString()!);
       await ctx.replyWithInvoice(invoice);
     });
+  } else if (value.action === promoCodeAction) {
+    bot.action(promoCodeAction, async (ctx) => {
+      await renderMessage({ index: promoCodeAction, ctx });
+
+      if (ctx.from?.username) {
+        fakeSession[ctx.from.username].inPromoCode = true;
+      }
+    });
   } else if (value.action === feedbackAction) {
     bot.action(feedbackAction, async (ctx) => {
       await renderMessage({ index: feedbackAction, ctx });
@@ -202,6 +249,7 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
             fakeSession[ctx.from.username].feedback = true;
           } else {
             fakeSession[ctx.from.username].feedback = false;
+            fakeSession[ctx.from.username].inPromoCode = false;
           }
         }
 
@@ -217,12 +265,23 @@ Object.entries(normalizedGraph).forEach(([, value]) => {
 });
 
 bot.on(message("text"), async (ctx) => {
-  if (ctx.from.username && fakeSession[ctx.from.username].feedback) {
+  if (ctx.from.username && fakeSession[ctx.from.username]?.feedback) {
     fakeSession[ctx.from.username].feedback = false;
     bot.telegram.sendMessage(
       "@reviews_from_bot",
       `Отзыв от @${ctx.from.username}: ${ctx.message.text}`
     );
     await renderMessage({ index: afterFeedbackAction, ctx, isNew: true });
+  }
+
+  if (ctx.from.username && fakeSession[ctx.from.username]?.inPromoCode) {
+    fakeSession[ctx.from.username].inPromoCode = false;
+    if (ctx.message.text === "promoCode") {
+      fakeSession[ctx.from.username].usedPromoCode = true;
+      fakeSession[ctx.from.username].isPayed = true;
+      await renderMessage({ index: afterPayment, ctx, isNew: true });
+    } else {
+      await renderMessage({ index: failedPromoCode, ctx, isNew: true });
+    }
   }
 });

@@ -2,14 +2,23 @@ import { MessageRaw } from "./main";
 
 export const beforePayment = -3;
 export const afterPayment = 3;
+export const failedPromoCode = -31;
 const touHref =
   "https://docs.google.com/document/d/12HHIYafMzj_BW-TDYT5onap69mNN7HTwaJdoaDPKXU4/";
 
 export const payAction = "pay";
 export const feedbackAction = "feedback";
+export const promoCodeAction = "promoCode";
 export const afterFeedbackAction = "afterFeedback";
 export const menu = 50;
 export const normalizedGraph: Record<string, MessageRaw> = {
+  [promoCodeAction]: {
+    message: `Введите промокод`,
+    action: promoCodeAction,
+  },
+  [failedPromoCode]: {
+    message: `Промокод не найден`,
+  },
   0: {
     message: `Я с удовольствием расскажу вам об интересующем вас функционале. Что именно вас интересует?
 Выберите нужный раздел 👇`,
