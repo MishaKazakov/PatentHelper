@@ -276,7 +276,7 @@ bot.on(message("text"), async (ctx) => {
 
   if (ctx.from.username && fakeSession[ctx.from.username]?.inPromoCode) {
     fakeSession[ctx.from.username].inPromoCode = false;
-    if (ctx.message.text === "promoCode") {
+    if (ctx.message.text.toLocaleLowerCase() === process.env.promocodeWord) {
       fakeSession[ctx.from.username].usedPromoCode = true;
       fakeSession[ctx.from.username].isPayed = true;
       await renderMessage({ index: afterPayment, ctx, isNew: true });
